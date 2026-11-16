@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from '#lib/enhance.ts';
 	import Field from './Field.svelte';
 	import { PRIORITY_LABEL } from '../labels';
 	import { WO_PRIORITIES } from '../enums';

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { afterNavigate } from '$app/navigation';
+	import { enhance } from '#lib/enhance.ts';
 	import { ROLE_LABEL } from '#lib/labels.ts';
 	import type { UserRole } from '#lib/enums.ts';
 	import type { LayoutProps } from './$types';
@@ -114,7 +115,7 @@
 			<div class="truncate text-xs text-slate-500">
 				{data.user.email} · {ROLE_LABEL[data.user.role]}
 			</div>
-			<form method="POST" action="/logout" class="mt-3">
+			<form method="POST" action="/logout" class="mt-3" use:enhance>
 				<button type="submit" class="btn-secondary w-full btn-sm">Keluar</button>
 			</form>
 		</div>

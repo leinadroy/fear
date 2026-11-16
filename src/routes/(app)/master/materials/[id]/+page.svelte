@@ -1,12 +1,13 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from '#lib/enhance.ts';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import Field from '#lib/components/Field.svelte';
 	import DeleteButton from '#lib/components/DeleteButton.svelte';
 	import { s } from '#lib/utils.ts';
+	import type { ActionForm } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data, form }: PageProps & { form: ActionForm } = $props();
 
 	const v = $derived<Record<string, unknown>>(form?.values ?? data.item ?? {});
 	const err = $derived<Record<string, string>>(form?.errors ?? {});

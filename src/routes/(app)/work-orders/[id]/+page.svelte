@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from '#lib/enhance.ts';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import DeleteButton from '#lib/components/DeleteButton.svelte';
 	import GeoButton from '#lib/components/GeoButton.svelte';
@@ -16,9 +16,10 @@
 	import { WO_STATUSES } from '#lib/enums.ts';
 	import { formatDateTime, formatDuration } from '#lib/datetime.ts';
 	import { mapsUrl } from '#lib/utils.ts';
+	import type { ActionForm } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data, form }: PageProps & { form: ActionForm } = $props();
 
 	const wo = $derived(data.wo);
 	const siteMap = $derived(mapsUrl(data.site.latitude, data.site.longitude));

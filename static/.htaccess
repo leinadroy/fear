@@ -1,0 +1,30 @@
+# FEAR — aturan untuk Apache / LiteSpeed (shared hosting cPanel).
+# Pasang FEAR di root domain atau subdomain (mis. https://fear.domainanda.com).
+
+Options -Indexes
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+
+	# Paksa HTTPS (wajib agar GPS di HP berfungsi). Beri tanda # di 3 baris ini jika domain belum punya SSL.
+	RewriteCond %{HTTPS} off
+	RewriteCond %{HTTP:X-Forwarded-Proto} !https
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+	# API & foto → PHP
+	RewriteCond %{REQUEST_URI} !^/api/index\.php$
+	RewriteRule ^(api|files)(/.*)?$ api/index.php [L,QSA]
+
+	# Halaman aplikasi (SPA) → index.html
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_headers.c>
+	<FilesMatch "\.html$">
+		Header set Cache-Control "no-cache"
+	</FilesMatch>
+</IfModule>

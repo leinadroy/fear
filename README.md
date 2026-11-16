@@ -1,56 +1,74 @@
-# sv
+# FEAR — Field Activity Engineering
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Aplikasi pengelolaan work order & kunjungan lapangan engineer.
 
-## Creating a project
+- **Tampilan:** SvelteKit (Svelte 5 + Tailwind), di-build jadi file statis (SPA).
+- **Backend:** PHP 8.1+ murni di folder [`api/`](api/) — tanpa Composer, tanpa Node.js di server.
+- **Database:** MySQL 5.7+ / MariaDB 10.3+ ([`api/schema.sql`](api/schema.sql)).
 
-If you're seeing this, you've probably already done this step. Congrats!
+Jadi FEAR bisa dipasang di **shared hosting cPanel biasa** (PHP + MySQL).
 
-```sh
-# create a new project
-npx sv create my-app
-```
+## Pasang di shared hosting
 
-To recreate this project with the same configuration:
+1. **Buat file zip** (di laptop, butuh Node.js):
 
-```sh
-# recreate this project
-npx sv@1.4.0 create --template minimal --types ts --add prettier eslint tailwindcss="plugins:forms" --install npm .
-```
+   ```bash
+   npm run package
+   ```
 
-## Adding features
+   Hasilnya `dist/fear-hosting.zip`.
 
-Add features to your project with `sv add`:
+2. **Siapkan hosting** di cPanel:
+   - _Select PHP Version_ → pilih **PHP 8.1 atau lebih baru**, pastikan ekstensi `pdo_mysql` aktif.
+   - _MySQL Databases_ → buat database + user, lalu beri user itu **ALL PRIVILEGES** ke database tersebut.
+   - Pastikan domain/subdomain sudah **SSL (https)** — GPS di HP hanya jalan lewat https.
+     Biasanya cukup jalankan _SSL/TLS Status_ → _Run AutoSSL_.
 
-```sh
-npx sv add
-```
+3. **Upload & ekstrak**: _File Manager_ → buka folder domain/subdomain (mis. `public_html` atau
+   `public_html/fear` untuk subdomain `fear.domainanda.com`) → _Upload_ `fear-hosting.zip` → klik kanan → _Extract_.
+   Aktifkan _Show Hidden Files_ untuk memastikan file `.htaccess` ikut terekstrak.
 
-For example, to add Tailwind CSS:
+   > FEAR harus dipasang di **root** domain atau subdomain, bukan di sub-folder seperti `domain.com/fear`.
 
-```sh
-npx sv add tailwindcss
-```
+4. **Jalankan penginstal**: buka `https://domain-anda/api/install`, isi data database dan akun admin pertama.
+   Penginstal membuat tabel, data master awal, akun admin, dan file `api/config.php`, lalu terkunci otomatis.
 
-## Developing
+5. Buka `https://domain-anda` dan login dengan akun admin tadi.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+**Update versi baru:** buat zip baru, upload & ekstrak menimpa file lama. File `api/config.php` dan foto
+di `api/storage/uploads/` tidak ada di dalam zip, jadi aman tidak tertimpa. Jika ada perubahan tabel,
+jalankan `api/schema.sql` lewat phpMyAdmin (aman diulang).
 
-```sh
-npm run dev
+**Backup:** database (phpMyAdmin → Export) + folder `api/storage/uploads/` (foto kunjungan).
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+## Development di laptop
 
-## Building
+Butuh Node.js 22+, PHP 8.1+ (mis. dari XAMPP) dan MySQL/MariaDB.
 
-To create a production version of your app:
+1. Salin `api/config.sample.php` jadi `api/config.php`, isi koneksi database lokal.
+2. Buat tabel: impor `api/schema.sql` ke database (atau buka `/api/install` tanpa `config.php`).
+3. Jalankan:
 
-```sh
-npm run build
-```
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-You can preview the production build with `npm run preview`.
+   `npm run dev` otomatis ikut menjalankan server PHP untuk `api/` (php.exe dicari di PATH,
+   `C:\xampp\php\php.exe`, atau env `PHP_BIN`). Buka http://localhost:5173.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+   `npm run dev:lan` = sama, tapi bisa dibuka dari HP di WiFi yang sama lewat https.
+
+Perintah lain: `npm run check` (cek tipe), `npm run lint`, `npm run format`.
+
+## Struktur
+
+| Folder                 | Isi                                                                       |
+| ---------------------- | ------------------------------------------------------------------------- |
+| `src/routes/`          | Halaman. Tiap halaman memuat datanya dari `GET /api/<path halaman>`.      |
+| `src/lib/enhance.ts`   | Pengirim form ke API PHP (`POST /api/<path>?/<aksi>`).                    |
+| `api/index.php`        | Pintu masuk API (semua `/api/*` dan `/files/*` diarahkan ke sini).        |
+| `api/routes/`          | Endpoint per modul: dashboard, master, users, work_orders, activities.    |
+| `api/lib/`             | Koneksi DB, login/sesi, validasi form, router.                            |
+| `api/storage/uploads/` | Foto kunjungan (tidak bisa diakses langsung; lewat `/files/...` + login). |
+| `static/.htaccess`     | Aturan rewrite Apache/LiteSpeed (ikut ke hasil build).                    |

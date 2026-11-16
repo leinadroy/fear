@@ -5,10 +5,10 @@
 		"types": ["$app/types", "node"]
 	},
 	"include": [
+		"scripts",
 		"src",
 		"vite.config.ts",
 		"prettier.config.js",
-		"eslint.config.js",
-		"drizzle.config.ts"
+		"eslint.config.js"
 	]
 }

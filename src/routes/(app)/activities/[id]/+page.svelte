@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from '#lib/enhance.ts';
 	import PageHeader from '#lib/components/PageHeader.svelte';
 	import DeleteButton from '#lib/components/DeleteButton.svelte';
 	import GeoButton from '#lib/components/GeoButton.svelte';
@@ -12,9 +12,10 @@
 	} from '#lib/labels.ts';
 	import { formatDateTime, formatDuration } from '#lib/datetime.ts';
 	import { mapsUrl, s } from '#lib/utils.ts';
+	import type { ActionForm } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
-	let { data, form }: PageProps = $props();
+	let { data, form }: PageProps & { form: ActionForm } = $props();
 
 	const act = $derived(data.activity);
 	const ongoing = $derived(act.status === 'ongoing');
@@ -160,7 +161,7 @@
 					<Field label="Foto (bisa pilih beberapa, maks 10 MB/foto)" class="min-w-0 flex-1">
 						<input
 							type="file"
-							name="photos"
+							name="photos[]"
 							accept="image/jpeg,image/png,image/webp"
 							multiple
 							required

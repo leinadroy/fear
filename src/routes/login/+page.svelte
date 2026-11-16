@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance } from '#lib/enhance.ts';
+	import type { ActionForm } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
-	let { form }: PageProps = $props();
+	let { form }: PageProps & { form: ActionForm } = $props();
 	let submitting = $state(false);
 </script>
 

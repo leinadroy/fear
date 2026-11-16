@@ -24,3 +24,9 @@ vite.config.ts.timestamp-*
 
 # Foto & file upload aplikasi
 /uploads
+
+# PHP API
+/api/config.php
+/api/storage/uploads/*
+!/api/storage/uploads/.gitkeep
+/dist
