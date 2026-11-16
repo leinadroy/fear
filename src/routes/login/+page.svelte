@@ -14,8 +14,10 @@
 <main class="flex min-h-screen items-center justify-center bg-slate-50 px-4">
 	<div class="w-full max-w-sm">
 		<div class="mb-8 text-center">
-			<h1 class="text-3xl font-bold tracking-tight text-slate-900">FEAR</h1>
-			<p class="mt-1 text-sm text-slate-500">Field Activity Engineering</p>
+			<a href="/welcome" class="inline-block" title="Tentang FEAR">
+				<h1 class="text-3xl font-bold tracking-tight text-slate-900">FEAR</h1>
+				<p class="mt-1 text-sm text-slate-500">Field Activity Engineering</p>
+			</a>
 		</div>
 
 		<form
