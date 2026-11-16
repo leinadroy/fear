@@ -7,7 +7,7 @@
  */
 import { eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
+import { createPool } from '../src/lib/server/db/pool.ts';
 import { users } from '../src/lib/server/db/schema.ts';
 import { MIN_PASSWORD_LENGTH, hashPassword } from '../src/lib/server/password.ts';
 
@@ -25,7 +25,7 @@ if (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < MIN_PASSWORD_LENGTH)
 	die(`ADMIN_PASSWORD di .env wajib diisi, minimal ${MIN_PASSWORD_LENGTH} karakter`);
 
 const email = ADMIN_EMAIL.trim().toLowerCase();
-const pool = mysql.createPool(DATABASE_URL);
+const pool = createPool(DATABASE_URL);
 const db = drizzle(pool);
 
 try {

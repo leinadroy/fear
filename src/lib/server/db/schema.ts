@@ -12,6 +12,13 @@ import {
 	timestamp,
 	varchar
 } from 'drizzle-orm/mysql-core';
+import {
+	ACTIVITY_STATUSES,
+	ASSIGNEE_ROLES,
+	USER_ROLES,
+	WO_PRIORITIES,
+	WO_STATUSES
+} from '../../enums.ts';
 
 /** Primary key BIGINT UNSIGNED AUTO_INCREMENT (`serial` Drizzle tidak valid di MariaDB). */
 const pk = () => bigint('id', { mode: 'number', unsigned: true }).autoincrement().primaryKey();
@@ -28,8 +35,6 @@ const lat = (name: string) => decimal(name, { precision: 10, scale: 7 });
 const lng = (name: string) => decimal(name, { precision: 10, scale: 7 });
 
 // ─── Pengguna ────────────────────────────────────────────────────────────────
-
-export const USER_ROLES = ['admin', 'supervisor', 'engineer'] as const;
 
 export const users = mysqlTable('users', {
 	id: pk(),
@@ -107,16 +112,6 @@ export const materials = mysqlTable('materials', {
 
 // ─── Work order (penugasan pekerjaan) ────────────────────────────────────────
 
-export const WO_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
-export const WO_STATUSES = [
-	'draft',
-	'assigned',
-	'in_progress',
-	'on_hold',
-	'completed',
-	'cancelled'
-] as const;
-
 export const workOrders = mysqlTable(
 	'work_orders',
 	{
@@ -147,8 +142,6 @@ export const workOrders = mysqlTable(
 	]
 );
 
-export const ASSIGNEE_ROLES = ['lead', 'member'] as const;
-
 export const workOrderAssignees = mysqlTable(
 	'work_order_assignees',
 	{
@@ -165,8 +158,6 @@ export const workOrderAssignees = mysqlTable(
 );
 
 // ─── Aktivitas lapangan (check-in / check-out per kunjungan) ─────────────────
-
-export const ACTIVITY_STATUSES = ['ongoing', 'done', 'failed'] as const;
 
 export const fieldActivities = mysqlTable(
 	'field_activities',

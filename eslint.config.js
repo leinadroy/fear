@@ -34,8 +34,10 @@ export default defineConfig(
 		}
 	},
 	{
-		// Override or add rule settings here, such as:
-		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// Aplikasi berjalan di root domain (tanpa `paths.base`), jadi href biasa sudah benar.
+			// Aktifkan lagi dan bungkus link dengan resolve() jika nanti dipasang di sub-path.
+			'svelte/no-navigation-without-resolve': 'off'
+		}
 	}
 );

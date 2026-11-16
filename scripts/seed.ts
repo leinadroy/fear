@@ -4,13 +4,13 @@
  */
 import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
+import { createPool } from '../src/lib/server/db/pool.ts';
 import { activityTypes, materials } from '../src/lib/server/db/schema.ts';
 
 const url = process.env.DATABASE_URL;
 if (!url) throw new Error('DATABASE_URL is not set');
 
-const pool = mysql.createPool(url);
+const pool = createPool(url);
 const db = drizzle(pool);
 
 const activityTypeRows = [
