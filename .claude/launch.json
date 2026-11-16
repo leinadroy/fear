@@ -6,6 +6,13 @@
 			"runtimeExecutable": "npm",
 			"runtimeArgs": ["run", "dev"],
 			"port": 5173
+		},
+		{
+			"name": "fear-lan",
+			"runtimeExecutable": "npm",
+			"runtimeArgs": ["run", "dev:lan"],
+			"port": 5173,
+			"url": "https://localhost:5173"
 		}
 	]
 }

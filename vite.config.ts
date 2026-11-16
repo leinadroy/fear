@@ -1,10 +1,14 @@
 import tailwindcss from '@tailwindcss/vite';
 import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import { defineConfig } from 'vite';
 
-export default defineConfig({
+// `npm run dev:lan`: buka akses dari HP di jaringan yang sama lewat HTTPS
+// (cookie login `secure` & GPS browser butuh HTTPS di luar localhost).
+export default defineConfig(({ mode }) => ({
 	plugins: [
+		mode === 'lan' && basicSsl(),
 		tailwindcss(),
 		sveltekit({
 			compilerOptions: {
@@ -19,4 +23,4 @@ export default defineConfig({
 			adapter: adapter()
 		})
 	]
-});
+}));
