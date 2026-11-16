@@ -42,6 +42,23 @@ export const users = mysqlTable('users', {
 	...timestamps
 });
 
+/** Sesi login. `id` = SHA-256 (hex) dari token di cookie; token asli tidak disimpan. */
+export const sessions = mysqlTable(
+	'sessions',
+	{
+		id: varchar('id', { length: 64 }).primaryKey(),
+		userId: fk('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		expiresAt: datetime('expires_at').notNull(),
+		createdAt: timestamp('created_at').notNull().defaultNow()
+	},
+	(t) => [index('sessions_user_idx').on(t.userId)]
+);
+
+export type User = typeof users.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+
 // ─── Master: pelanggan, lokasi, jenis aktivitas, material ────────────────────
 
 export const customers = mysqlTable('customers', {
@@ -213,6 +230,7 @@ export const activityMaterials = mysqlTable(
 // ─── Relasi (untuk db.query.*.findMany({ with: ... })) ───────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
+	sessions: many(sessions),
 	createdWorkOrders: many(workOrders),
 	assignments: many(workOrderAssignees),
 	fieldActivities: many(fieldActivities)
@@ -280,4 +298,8 @@ export const activityMaterialsRelations = relations(activityMaterials, ({ one })
 		fields: [activityMaterials.materialId],
 		references: [materials.id]
 	})
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+	user: one(users, { fields: [sessions.userId], references: [users.id] })
 }));
