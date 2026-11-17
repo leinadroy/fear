@@ -19,6 +19,7 @@ if ($path === '/api/install') {
 require __DIR__ . '/lib/core.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/form.php';
+require __DIR__ . '/lib/mail.php';
 require __DIR__ . '/lib/router.php';
 
 date_default_timezone_set('UTC');

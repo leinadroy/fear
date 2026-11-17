@@ -39,6 +39,11 @@ Jadi FEAR bisa dipasang di **shared hosting cPanel biasa** (PHP + MySQL).
 di `api/storage/uploads/` tidak ada di dalam zip, jadi aman tidak tertimpa. Jika ada perubahan tabel,
 jalankan `api/schema.sql` lewat phpMyAdmin (aman diulang).
 
+**Lupa password:** link reset dikirim lewat `mail()` bawaan PHP (di cPanel biasanya langsung jalan).
+Pastikan `api/config.php` berisi `'app_url' => 'https://domain-anda'` (penginstal versi baru mengisinya
+otomatis) agar link di email selalu mengarah ke domain yang benar. Opsional: `'mail_from'` untuk alamat
+pengirim. Saat `'debug' => true`, isi email juga ditulis ke `api/storage/mail.log` untuk dites di laptop.
+
 **Backup:** database (phpMyAdmin → Export) + folder `api/storage/uploads/` (foto kunjungan).
 
 ## Development di laptop

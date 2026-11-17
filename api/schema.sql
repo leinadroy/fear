@@ -32,6 +32,18 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Link "lupa password". `id` = hash SHA-256 dari token di link; token aslinya hanya ada di email.
+CREATE TABLE IF NOT EXISTS `password_resets` (
+	`id` varchar(64) NOT NULL,
+	`user_id` bigint unsigned NOT NULL,
+	`expires_at` datetime NOT NULL,
+	`used_at` datetime DEFAULT NULL,
+	`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`id`),
+	KEY `password_resets_user_idx` (`user_id`),
+	CONSTRAINT `password_resets_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `customers` (
 	`id` bigint unsigned NOT NULL AUTO_INCREMENT,
 	`code` varchar(30) NOT NULL,

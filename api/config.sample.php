@@ -11,6 +11,10 @@ return [
 		'user' => 'root',
 		'pass' => ''
 	],
+	// Alamat aplikasi, dipakai untuk link di email (mis. lupa password). Tanpa garis miring di akhir.
+	'app_url' => 'https://fear.domainanda.com',
+	// Pengirim email. Kosongkan untuk memakai noreply@<domain app_url>.
+	'mail_from' => '',
 	// Folder penyimpanan foto kunjungan (tidak bisa diakses langsung dari web).
 	'upload_dir' => __DIR__ . '/storage/uploads',
 	// true = tampilkan pesan error asli (hanya untuk pengembangan).

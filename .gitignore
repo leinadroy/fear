@@ -29,4 +29,5 @@ vite.config.ts.timestamp-*
 /api/config.php
 /api/storage/uploads/*
 !/api/storage/uploads/.gitkeep
+/api/storage/mail.log
 /dist

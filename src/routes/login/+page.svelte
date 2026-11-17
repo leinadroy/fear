@@ -3,8 +3,11 @@
 	import type { ActionForm } from '#lib/types.ts';
 	import type { PageProps } from './$types';
 
+	import { page } from '$app/state';
+
 	let { form }: PageProps & { form: ActionForm } = $props();
 	let submitting = $state(false);
+	const passwordReset = $derived(page.url.searchParams.get('reset') === '1');
 </script>
 
 <svelte:head>
@@ -33,6 +36,15 @@
 		>
 			<h2 class="text-lg font-semibold text-slate-800">Masuk ke akun Anda</h2>
 
+			{#if passwordReset && !form?.message}
+				<p
+					class="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700"
+					role="status"
+				>
+					Password berhasil diganti. Silakan masuk dengan password baru.
+				</p>
+			{/if}
+
 			{#if form?.message}
 				<p
 					class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
@@ -55,7 +67,15 @@
 			</label>
 
 			<label class="block">
-				<span class="text-sm font-medium text-slate-700">Password</span>
+				<span class="flex items-baseline justify-between">
+					<span class="text-sm font-medium text-slate-700">Password</span>
+					<a
+						href="/forgot-password"
+						class="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+					>
+						Lupa password?
+					</a>
+				</span>
 				<input
 					type="password"
 					name="password"

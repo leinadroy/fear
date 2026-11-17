@@ -64,6 +64,8 @@ if (!$installed && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
 			$config = "<?php\n// Dibuat oleh penginstal FEAR " . gmdate('Y-m-d H:i') . " UTC.\nreturn " . var_export([
 				'db' => $db,
+				'app_url' => ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'),
+				'mail_from' => '',
 				'upload_dir' => '__UPLOADS__',
 				'debug' => false
 			], true) . ";\n";
