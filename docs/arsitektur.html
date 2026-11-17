@@ -1,0 +1,337 @@
+<title>Arsitektur FEAR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: satu kolom dokumen teknis, diagram SVG lebar penuh dalam kontainer scroll-x */
+:root {
+  --bg: #f5f7f9; --surface: #ffffff; --fg: #17212c; --muted: #586474;
+  --border: #d6dde5; --line: #8794a3;
+  --accent: #d9590b; --accent-soft: #fde8d9;
+  --blue: #23609f; --blue-soft: #e2ecf7;
+  --green: #2b7a4b; --green-soft: #e0f0e6;
+  --font-display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f141a; --surface: #171e27; --fg: #e5eaf0; --muted: #98a4b2;
+  --border: #2a3542; --line: #6c7988;
+  --accent: #f08a40; --accent-soft: #3a2314;
+  --blue: #6fa7e6; --blue-soft: #162a40;
+  --green: #6cc28f; --green-soft: #142e1e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #171e27; --fg: #e5eaf0; --muted: #98a4b2;
+  --border: #2a3542; --line: #6c7988;
+  --accent: #f08a40; --accent-soft: #3a2314;
+  --blue: #6fa7e6; --blue-soft: #162a40;
+  --green: #6cc28f; --green-soft: #142e1e; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.2; }
+h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+header { display: grid; gap: 12px; }
+header p { color: var(--muted); font-size: 17px; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.chip { font-family: var(--font-mono); font-size: 12.5px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); }
+.chip.fe { border-color: var(--accent); color: var(--accent); }
+.chip.be { border-color: var(--blue); color: var(--blue); }
+.chip.db { border-color: var(--green); color: var(--green); }
+section { display: grid; gap: 16px; }
+.sec-head { display: grid; gap: 6px; }
+.sec-head p { color: var(--muted); }
+.figure { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; padding: 16px; }
+.figure svg { display: block; min-width: 820px; width: 100%; height: auto; }
+
+/* SVG */
+.box { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+.box.fe { fill: var(--accent-soft); stroke: var(--accent); }
+.box.be { fill: var(--blue-soft); stroke: var(--blue); }
+.box.db { fill: var(--green-soft); stroke: var(--green); }
+.frame { fill: none; stroke: var(--line); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.t { fill: var(--fg); font-family: var(--font-display); font-size: 14px; font-weight: 700; }
+.s { fill: var(--muted); font-family: var(--font-body); font-size: 12px; }
+.m { fill: var(--fg); font-family: var(--font-mono); font-size: 11.5px; }
+.lbl { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+.flbl { fill: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
+.edge { fill: none; stroke: var(--line); stroke-width: 1.6; }
+.edge.dash { stroke-dasharray: 5 4; }
+.arrowhead { fill: var(--line); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; border: 1.5px solid; }
+.sw.fe { background: var(--accent-soft); border-color: var(--accent); }
+.sw.be { background: var(--blue-soft); border-color: var(--blue); }
+.sw.db { background: var(--green-soft); border-color: var(--green); }
+.sw.ac { background: var(--surface); border-color: var(--line); }
+
+.flows { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.flow { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.flow h3 code { color: var(--accent); }
+.flow ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.flow li { padding-left: 4px; }
+.flow li::marker { font-family: var(--font-mono); color: var(--muted); }
+
+.tbl-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14px; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; white-space: nowrap; }
+
+.sec-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.sec-item { border-left: 3px solid var(--blue); padding: 4px 0 4px 14px; display: grid; gap: 2px; min-width: 0; }
+.sec-item b { font-family: var(--font-display); font-size: 14.5px; }
+.sec-item span { color: var(--muted); font-size: 14px; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Field Activity Engineering · branch feat/modules</div>
+    <h1>Arsitektur FEAR</h1>
+    <p>Aplikasi work order dan kunjungan lapangan engineer. Frontend dibuild jadi file statis, backend PHP murni, database MySQL. Di server cukup PHP dan MySQL, jadi bisa jalan di shared hosting cPanel biasa tanpa Node.js.</p>
+    <div class="stack">
+      <span class="chip fe">SvelteKit 3 · Svelte 5</span>
+      <span class="chip fe">Tailwind CSS 4</span>
+      <span class="chip fe">TypeScript 6 · Vite 8</span>
+      <span class="chip be">PHP 8.1+ tanpa framework</span>
+      <span class="chip db">MySQL 5.7+ / MariaDB 10.3+</span>
+      <span class="chip">Apache / LiteSpeed</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head">
+      <h2>Gambaran sistem</h2>
+      <p>Semua request masuk lewat <code>.htaccess</code>. Path <code>/api/*</code> dan <code>/files/*</code> diteruskan ke PHP, path lain dijawab dengan <code>index.html</code> (SPA).</p>
+    </div>
+    <div class="figure">
+      <svg viewBox="0 0 960 500" role="img" aria-labelledby="sysTitle">
+        <title id="sysTitle">Diagram sistem FEAR: browser, hosting cPanel berisi .htaccess, SPA statis, API PHP, penyimpanan foto, dan database MySQL</title>
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" class="arrowhead"/>
+          </marker>
+        </defs>
+
+        <!-- Client -->
+        <rect class="box fe" x="20" y="170" width="200" height="150" rx="8"/>
+        <text class="t" x="36" y="198">Browser / HP</text>
+        <text class="s" x="36" y="218">Engineer &amp; supervisor</text>
+        <text class="m" x="36" y="248">SPA Svelte 5</text>
+        <text class="m" x="36" y="268">src/lib/api.ts</text>
+        <text class="m" x="36" y="288">GPS · kamera</text>
+        <text class="s" x="36" y="308">butuh HTTPS</text>
+
+        <!-- Hosting frame -->
+        <rect class="frame" x="260" y="28" width="460" height="452" rx="10"/>
+        <text class="flbl" x="278" y="52">Shared hosting cPanel</text>
+
+        <rect class="box" x="290" y="70" width="400" height="64" rx="6"/>
+        <text class="t" x="306" y="96">.htaccess</text>
+        <text class="s" x="306" y="118">paksa HTTPS · rewrite · tanpa directory listing</text>
+
+        <rect class="box fe" x="290" y="180" width="180" height="110" rx="6"/>
+        <text class="t" x="306" y="206">File statis SPA</text>
+        <text class="m" x="306" y="230">index.html</text>
+        <text class="m" x="306" y="250">_app/*.js, *.css</text>
+        <text class="s" x="306" y="274">hasil adapter-static</text>
+
+        <rect class="box be" x="510" y="180" width="180" height="60" rx="6"/>
+        <text class="t" x="526" y="206">api/index.php</text>
+        <text class="s" x="526" y="226">pintu masuk API</text>
+
+        <rect class="box be" x="510" y="265" width="180" height="70" rx="6"/>
+        <text class="t" x="526" y="290">api/lib/</text>
+        <text class="m" x="526" y="310">router · auth</text>
+        <text class="m" x="526" y="326">form · core (PDO)</text>
+
+        <rect class="box be" x="510" y="360" width="180" height="104" rx="6"/>
+        <text class="t" x="526" y="384">api/routes/</text>
+        <text class="m" x="526" y="404">dashboard · auth</text>
+        <text class="m" x="526" y="420">work_orders</text>
+        <text class="m" x="526" y="436">activities · master</text>
+        <text class="m" x="526" y="452">users · files</text>
+
+        <rect class="box" x="290" y="380" width="180" height="70" rx="6"/>
+        <text class="t" x="306" y="406">storage/uploads</text>
+        <text class="s" x="306" y="428">foto kunjungan, tidak</text>
+        <text class="s" x="306" y="442">bisa diakses langsung</text>
+
+        <!-- Database -->
+        <rect class="box db" x="760" y="340" width="180" height="120" rx="8"/>
+        <text class="t" x="776" y="368">MySQL / MariaDB</text>
+        <text class="s" x="776" y="390">12 tabel</text>
+        <text class="m" x="776" y="414">api/schema.sql</text>
+        <text class="m" x="776" y="434">utf8mb4 · FK</text>
+
+        <!-- Edges -->
+        <path class="edge" d="M220 200 H245 V102 H288" marker-end="url(#ah)"/>
+        <text class="lbl" x="150" y="160">HTTPS</text>
+        <path class="edge dash" d="M290 262 H222" marker-end="url(#ah)"/>
+        <text class="lbl" x="226" y="282">SPA</text>
+
+        <path class="edge" d="M380 134 V178" marker-end="url(#ah)"/>
+        <text class="lbl" x="388" y="160">path lain</text>
+        <path class="edge" d="M600 134 V178" marker-end="url(#ah)"/>
+        <text class="lbl" x="608" y="160">/api/* · /files/*</text>
+
+        <path class="edge" d="M600 240 V263" marker-end="url(#ah)"/>
+        <path class="edge" d="M600 335 V358" marker-end="url(#ah)"/>
+
+        <path class="edge" d="M690 400 H758" marker-end="url(#ah)"/>
+        <text class="lbl" x="704" y="392">PDO</text>
+        <path class="edge" d="M510 415 H472" marker-end="url(#ah)"/>
+        <text class="lbl" x="476" y="474">foto</text>
+
+        <text class="lbl" x="20" y="350">JSON kembali ke browser</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw fe"></i>Frontend</span>
+      <span><i class="sw be"></i>Backend PHP</span>
+      <span><i class="sw db"></i>Database</span>
+      <span><i class="sw ac"></i>Server / file</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Alur request</h2>
+      <p>Halaman dan API memakai path yang sama. Kontraknya sengaja dibuat mirip <code>load</code> dan form action bawaan SvelteKit.</p>
+    </div>
+    <div class="flows">
+      <div class="flow">
+        <h3>Buka halaman · <code>GET /api/&lt;path&gt;</code></h3>
+        <ol>
+          <li>User membuka misalnya <code>/work-orders/12</code>. <code>.htaccess</code> menjawab dengan <code>index.html</code>.</li>
+          <li><code>+page.ts</code> memanggil <code>GET /api/work-orders/12</code> beserta cookie <code>fear_session</code>.</li>
+          <li><code>router.php</code> mencocokkan route, <code>auth.php</code> memeriksa sesi dan role.</li>
+          <li>Route di <code>work_orders.php</code> menjalankan query lewat PDO lalu mengirim JSON.</li>
+          <li>Svelte merender data. Kalau error, <code>+error.svelte</code> yang tampil; kalau belum login, user diarahkan ke <code>/login</code>.</li>
+        </ol>
+      </div>
+      <div class="flow">
+        <h3>Kirim form · <code>POST /api/&lt;path&gt;?/&lt;aksi&gt;</code></h3>
+        <ol>
+          <li><code>enhance.ts</code> mengirim form dengan header <code>X-Fear-Request: 1</code>.</li>
+          <li><code>router.php</code> menolak request tanpa header itu atau dengan <code>Origin</code> berbeda (CSRF).</li>
+          <li><code>form.php</code> memvalidasi input, file foto disimpan ke <code>storage/uploads</code>.</li>
+          <li>Hasilnya <code>{type: success | failure | redirect | error}</code>.</li>
+          <li>Frontend menampilkan pesan error per field atau pindah halaman sesuai <code>type</code>.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Model data</h2>
+      <p>Panah mengarah dari tabel anak ke tabel induk (foreign key). <code>work_orders</code> jadi pusat: lokasi, jenis kegiatan, tim yang ditugaskan, dan catatan kunjungan semuanya terhubung ke sana.</p>
+    </div>
+    <div class="figure">
+      <svg viewBox="0 0 960 340" role="img" aria-labelledby="erTitle">
+        <title id="erTitle">Relasi 12 tabel database FEAR</title>
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" class="arrowhead"/>
+          </marker>
+        </defs>
+        <!-- edges first -->
+        <path class="edge" d="M210 62 H172" marker-end="url(#ah2)"/>
+        <path class="edge" d="M420 150 V120 H285 V86" marker-end="url(#ah2)"/>
+        <path class="edge" d="M400 172 H362" marker-end="url(#ah2)"/>
+        <path class="edge" d="M475 84 V148" marker-end="url(#ah2)"/>
+        <path class="edge" d="M550 62 H598" marker-end="url(#ah2)"/>
+        <path class="edge" d="M600 172 H552" marker-end="url(#ah2)"/>
+        <path class="edge" d="M675 150 V86" marker-end="url(#ah2)"/>
+        <path class="edge" d="M790 62 H752" marker-end="url(#ah2)"/>
+        <path class="edge" d="M675 270 V196" marker-end="url(#ah2)"/>
+        <path class="edge" d="M475 270 V240 H640 V196" marker-end="url(#ah2)"/>
+        <path class="edge" d="M400 292 H362" marker-end="url(#ah2)"/>
+
+        <g>
+          <rect class="box" x="20" y="40" width="150" height="44" rx="6"/><text class="m" x="34" y="67">customers</text>
+          <rect class="box" x="210" y="40" width="150" height="44" rx="6"/><text class="m" x="224" y="67">sites</text>
+          <rect class="box be" x="400" y="40" width="150" height="44" rx="6"/><text class="m" x="414" y="67">work_order_assignees</text>
+          <rect class="box db" x="600" y="40" width="150" height="44" rx="6"/><text class="m" x="614" y="67">users</text>
+          <rect class="box db" x="790" y="40" width="150" height="44" rx="6"/><text class="m" x="804" y="67">sessions</text>
+
+          <rect class="box" x="210" y="150" width="150" height="44" rx="6"/><text class="m" x="224" y="177">activity_types</text>
+          <rect class="box fe" x="400" y="150" width="150" height="44" rx="6"/><text class="m" x="414" y="177">work_orders</text>
+          <rect class="box be" x="600" y="150" width="150" height="44" rx="6"/><text class="m" x="614" y="177">field_activities</text>
+          <rect class="box db" x="790" y="150" width="150" height="44" rx="6"/><text class="m" x="804" y="177">login_attempts</text>
+
+          <rect class="box" x="210" y="270" width="150" height="44" rx="6"/><text class="m" x="224" y="297">materials</text>
+          <rect class="box be" x="400" y="270" width="150" height="44" rx="6"/><text class="m" x="414" y="297">activity_materials</text>
+          <rect class="box be" x="600" y="270" width="150" height="44" rx="6"/><text class="m" x="614" y="297">activity_photos</text>
+        </g>
+        <text class="lbl" x="682" y="122">user_id</text>
+        <text class="lbl" x="560" y="54">user_id</text>
+        <text class="lbl" x="682" y="236">1 kunjungan → n foto</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw ac"></i>Master data</span>
+      <span><i class="sw fe"></i>Work order (pusat)</span>
+      <span><i class="sw be"></i>Penugasan &amp; kunjungan</span>
+      <span><i class="sw db"></i>Akun &amp; sesi</span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Enum</th><th>Nilai</th></tr></thead>
+        <tbody>
+          <tr><td>Role user</td><td><code>admin</code> · <code>supervisor</code> · <code>engineer</code> (admin dan supervisor boleh kelola master data dan work order)</td></tr>
+          <tr><td>Status work order</td><td><code>draft</code> → <code>assigned</code> → <code>in_progress</code> → <code>on_hold</code> → <code>completed</code> / <code>cancelled</code></td></tr>
+          <tr><td>Prioritas</td><td><code>low</code> · <code>medium</code> · <code>high</code> · <code>urgent</code></td></tr>
+          <tr><td>Peran di tim</td><td><code>lead</code> · <code>member</code></td></tr>
+          <tr><td>Status kunjungan</td><td><code>ongoing</code> · <code>done</code> · <code>failed</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Keamanan</h2>
+    </div>
+    <div class="sec-list">
+      <div class="sec-item"><b>Session cookie</b><span><code>fear_session</code> httponly, SameSite=Lax, secure di HTTPS. Database hanya menyimpan hash SHA-256 token.</span></div>
+      <div class="sec-item"><b>Umur sesi</b><span>30 hari, diperpanjang otomatis kalau sisanya kurang dari 15 hari.</span></div>
+      <div class="sec-item"><b>Batas login</b><span>Maksimal 5 kali gagal per 15 menit, dicatat di <code>login_attempts</code>.</span></div>
+      <div class="sec-item"><b>CSRF</b><span>Header <code>X-Fear-Request</code> wajib ada dan <code>Origin</code> harus sama dengan host.</span></div>
+      <div class="sec-item"><b>Foto terlindungi</b><span>Folder upload diblokir <code>.htaccess</code>, foto hanya bisa dibuka lewat <code>/files/...</code> setelah login.</span></div>
+      <div class="sec-item"><b>Penginstal terkunci</b><span><code>/api/install</code> tidak bisa dipakai lagi setelah <code>config.php</code> dibuat.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <h2>Development vs produksi</h2>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th></th><th>Laptop (development)</th><th>Shared hosting (produksi)</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend</td><td><code>vite dev</code> di localhost:5173, hot reload</td><td>File statis dari <code>npm run build</code></td></tr>
+          <tr><td>API PHP</td><td><code>php -S 127.0.0.1:8787</code> dijalankan otomatis oleh plugin Vite</td><td>Apache / LiteSpeed lewat <code>.htaccess</code></td></tr>
+          <tr><td>HTTPS</td><td><code>npm run dev:lan</code> dengan sertifikat self-signed untuk tes di HP</td><td>AutoSSL cPanel, HTTP dipaksa pindah ke HTTPS</td></tr>
+          <tr><td>Kebutuhan</td><td>Node 22+, PHP 8.1+ (misalnya XAMPP), MySQL</td><td>PHP 8.1+ dengan <code>pdo_mysql</code>, MySQL</td></tr>
+          <tr><td>Rilis</td><td><code>npm run package</code> → <code>dist/fear-hosting.zip</code></td><td>Upload dan ekstrak zip. <code>config.php</code> dan foto tidak ikut tertimpa</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer>Disusun dari kode di repository FEAR (README, <code>api/</code>, <code>src/</code>, <code>vite.config.ts</code>, <code>api/schema.sql</code>) per 17 November 2026.</footer>
+</div>
